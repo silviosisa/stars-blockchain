@@ -38,13 +38,16 @@ class Block {
     validate() {
         let self = this;
         return new Promise((resolve, reject) => {
+
             // Save in auxiliary variable the current block hash
             const auxiliary = self.hash;
-
+            self.hash = null;
+            
             // Recalculate the hash of the Block
-            const recalculate = SHA256(JSON.stringify(self)).toString;
+            const recalculate = SHA256(JSON.stringify(self)).toString();
             // Comparing if the hashes changed
             const isChanged = auxiliary != recalculate;
+            self.hash = auxiliary;
             // Returning the Block is not valid
             if(isChanged){
                 reject(new Error('Not iqual'));

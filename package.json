@@ -16,5 +16,8 @@
     "express": "^4.16.4",
     "hex2ascii": "0.0.3",
     "morgan": "^1.9.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
   }
 }
