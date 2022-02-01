@@ -12,6 +12,8 @@ const SHA256 = require('crypto-js/sha256');
 const BlockClass = require('./block.js');
 const bitcoinMessage = require('bitcoinjs-message');
 const e = require('express');
+var dayjs = require('dayjs');
+const MAX_ELPSEP_TIME = 5;
 
 class Blockchain {
 
@@ -131,16 +133,21 @@ class Blockchain {
         let self = this;
         return new Promise(async (resolve, reject) => {
             try{
-                let currentTime = parseInt(new Date().getTime().toString().slice(0, -3));
-                const messageTime = parseInt(message.split(':')[1])
-                const isElpasedTime = (messageTime > currentTime);
+                const currentTime = dayjs();
+                const messageTime = dayjs.unix(parseInt(message.split(':')[1])).format();
+                const diffTime = currentTime.diff(messageTime, 'minutes', true);
+                // Check 5 min time pass
+                if(diffTime > MAX_ELPSEP_TIME){
+                    throw new SyntaxError(`Time is elapsed more than ${MAX_ELPSEP_TIME} min`);
+                }
+
                 const verifySubmit = bitcoinMessage.verify(message, address, signature);
                 const dataSend = {address, message, signature, star};
                 const newBlock = new BlockClass.Block({data: dataSend});
                 const blockAdded = await this._addBlock(newBlock);
                 resolve(blockAdded);
             }catch(err){
-                reject("Error on submit star");
+                reject(err.message);
             }
         });
     }
@@ -226,7 +233,7 @@ class Blockchain {
             let promises = [];
 
             self.chain.forEach((item) => {
-                promises.push(item.validate())
+                promises.push(item.validate());
             });
         
             Promise.all(promises).then(function(results) {

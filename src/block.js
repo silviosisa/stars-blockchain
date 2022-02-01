@@ -50,9 +50,9 @@ class Block {
             self.hash = auxiliary;
             // Returning the Block is not valid
             if(isChanged){
-                reject(new Error('Not iqual'));
+                reject(false);
             }else{
-                resolve('The block is valid')
+                resolve(true);
             }
             // Returning the Block is valid
 

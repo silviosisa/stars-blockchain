@@ -58,6 +58,7 @@ class BlockchainController {
         this.app.post("/submitstar", async (req, res) => {
             if(req.body.address && req.body.message && req.body.signature && req.body.star) {
                 const address = req.body.address;
+                console.log('req body message', req.body.message);
                 const message = req.body.message;
                 const signature = req.body.signature;
                 const star = req.body.star;
