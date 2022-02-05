@@ -9,6 +9,7 @@
  */
 
 const SHA256 = require('crypto-js/sha256');
+const _ = require('lodash')
 const BlockClass = require('./block.js');
 const bitcoinMessage = require('bitcoinjs-message');
 const e = require('express');
@@ -143,7 +144,7 @@ class Blockchain {
 
                 const verifySubmit = bitcoinMessage.verify(message, address, signature);
                 if(verifySubmit === false){
-                    throw new SyntaxError(`Message no valid`);
+                    throw new SyntaxError(`Message no valid. message: ${message} address: ${address} signature: ${signature}`);
                 }
                 const dataSend = {address, message, signature, star};
                 const newBlock = new BlockClass.Block({data: dataSend});
@@ -162,9 +163,15 @@ class Blockchain {
      * @param {*} hash
      */
     getBlockByHash(hash) {
+        if (_.isNil(hash)) throw new Error()
         let self = this;
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             let block = self.chain.filter(p => p.hash === hash);
+            if(_.isEmpty(block)){
+                resolve('Block not found');
+            }else {
+                resolve(block);
+            }
         });
     }
 
@@ -196,27 +203,20 @@ class Blockchain {
         return new Promise(async (resolve, reject) => {
                try {
                 let promises = [];
-                let stars = [];
                 await self.chain.forEach((item) => {
                     promises.push(item.getBData());
                 });
 
                 Promise.all(promises).then((results) => {
                    const allStars = results.filter((item, index) => index !== 0).map((item) => item.data).filter((item) => item.address === address)
-                   console.log(allStars);
-
+                   if(allStars.length > 0){
+                       resolve(allStars);
+                   }else{
+                       resolve(false);
+                   }
                 }).catch(err => {
                     reject(err);
                 })
-
-                //    console.log('entra a get block hash');
-                //    const testblok =  await self.chain[1].getBData();
-                //    console.log(testblok);
-                //    const stars = self.chain.filter((item) => {
-
-                //     item.getBD
-                //    })
-                   resolve(stars);
                } catch (error) {
                    reject(error);
                }
@@ -230,21 +230,22 @@ class Blockchain {
      * 2. Each Block should check the with the previousBlockHash
      */
     validateChain() {
+        console.log('!!VALIDATE CHAIN');
         let self = this;
-        let errorLog = [];
         return new Promise(async (resolve, reject) => {
-            let promises = [];
-
-            self.chain.forEach((item) => {
-                promises.push(item.validate());
-            });
-
-            Promise.all(promises).then(function(results) {
-                resolve(results);
-            }).catch(function(err) {
-                reject(err)
-
-            });
+            console.log(self.chain);
+            resolve(true);
+            // let promises = [];
+            //
+            // self.chain.forEach((item) => {
+            //     promises.push(item.validate());
+            // });
+            //
+            // Promise.all(promises).then(function(results) {
+            //     resolve(results);
+            // }).catch(function(err) {
+            //     reject(err)
+            // });
         });
     }
 
