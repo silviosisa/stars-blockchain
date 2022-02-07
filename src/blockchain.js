@@ -77,21 +77,10 @@ class Blockchain {
                  }
                  block.hash = SHA256(JSON.stringify(block)).toString();
                  self.chain.push(block); //push new block
-                 console.log('llega a resolve');
-                 let errors = await self.validateChain(); //call the validate chain method
-                 console.log(errors)
+                 await self.validateChain(); //call the validate chain method
 
                  resolve(block) //resolve the new block
-                 // let errors = await self.validateChain(); //call the validate chain method
-                 // console.log(errors)
-                 // console.debug('Validation of chain ended')
-                 // if (errors.length === 0 ){ //if no errors in blockchain
-                 //     self.chain.push(block); //push new block
-                 //     self.height++; //increment height
-                 //     resolve(block) //resolve the new block
-                 // }else{
-                 //     reject(errors);
-                 // }
+
             } catch (error) {
                 reject('Error on add block')
             }
@@ -187,7 +176,7 @@ class Blockchain {
             if(block){
                 resolve(block);
             } else {
-                resolve(null);
+                reject();
             }
         });
     }
@@ -233,19 +222,20 @@ class Blockchain {
         console.log('!!VALIDATE CHAIN');
         let self = this;
         return new Promise(async (resolve, reject) => {
-            console.log(self.chain);
-            resolve(true);
-            // let promises = [];
-            //
-            // self.chain.forEach((item) => {
-            //     promises.push(item.validate());
-            // });
-            //
-            // Promise.all(promises).then(function(results) {
-            //     resolve(results);
-            // }).catch(function(err) {
-            //     reject(err)
-            // });
+           try{
+               for (const [index, block] of self.chain.entries()) {
+                   const validBlock = await block.validate();
+                   if(validBlock === false) {  throw 'Block its not valid';}
+                    if(index > 0) {
+                      const validPrevHash = self.chain[index - 1].hash === block.previousBlockHash;
+                      if(validPrevHash === false) { throw 'Previous Block is diferent from the actual block';}
+                    }
+               }
+           }catch (e) {
+               reject();
+           }
+           resolve('BlockChain are valid');
+
         });
     }
 
