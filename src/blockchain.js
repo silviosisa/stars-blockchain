@@ -76,8 +76,10 @@ class Blockchain {
                  block.previousBlockHash = self.chain[self.chain.length-1].hash; //get previous hash
                  }
                  block.hash = SHA256(JSON.stringify(block)).toString();
+
+                await self.validateChain(); //call the validate chain method
+
                  self.chain.push(block); //push new block
-                 await self.validateChain(); //call the validate chain method
 
                  resolve(block) //resolve the new block
 
@@ -219,7 +221,6 @@ class Blockchain {
      * 2. Each Block should check the with the previousBlockHash
      */
     validateChain() {
-        console.log('!!VALIDATE CHAIN');
         let self = this;
         return new Promise(async (resolve, reject) => {
            try{
