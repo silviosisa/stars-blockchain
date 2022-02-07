@@ -129,7 +129,7 @@ class Blockchain {
                 const messageTime = dayjs.unix(parseInt(message.split(':')[1])).format();
                 const diffTime = currentTime.diff(messageTime, 'minutes', true);
                 // Check 5 min time pass
-                if(diffTime < MAX_ELPSEP_TIME){
+                if(diffTime > MAX_ELPSEP_TIME){
                     throw new SyntaxError(`Time is elapsed more than ${MAX_ELPSEP_TIME} min`);
                 }
 
